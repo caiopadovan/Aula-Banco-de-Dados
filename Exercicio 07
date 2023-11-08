@@ -8,7 +8,7 @@ begin
 	select nome, salario into v_nome_funcionario, v_salario_dia from tb_funcionario
 	where id_funcionario = p_id_funcionario;
 	if(v_nome_funcionario is not null) then
-		return 'O empregado ' ||v_nome_funcionario|| 'recebe' ||v_salario_dia|| 'por dia de trabalho';
+		return 'O empregado ' ||v_nome_funcionario|| 'recebe' ||(v_salario_dia/p_dias)|| 'por dia de trabalho';
 	else
 		return 'Não existe esse funcionario!';
 	end if;
