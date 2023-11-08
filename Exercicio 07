@@ -27,7 +27,7 @@ declare
 v_nome_funcionario tb_funcionario.nome%type;
 v_cargo tb_funcionario.cargo%type;
 begin
-	select nome into v_nome_funcionario from tb_funcionario
+	select nome, cargo into v_nome_funcionario, v_cargo from tb_funcionario
 	where id_funcionario = p_id_funcionario;
 	if(v_nome_funcionario is not null) then
 		return 'O funcionario ' ||p_id_funcionario|| '-' ||upper(v_nome)|| 'exerce o cargo de ' ||upper(v_cargo);
