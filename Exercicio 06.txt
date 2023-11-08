@@ -1,0 +1,282 @@
+create database "EXERCICIO_06"
+template = template0
+encoding 'UTF-8'
+connection limit = 100;
+
+
+create table tb_departamento(
+id_departamento		integer,
+nome				varchar(60),
+cidade				varchar(40),
+fg_ativo			integer,
+constraint pk_id_depto_tb_departamento primary key(id_departamento)
+);
+
+create table tb_grade_salario(
+id_salario		integer,
+min_salario		numeric,
+max_salario		numeric,
+fg_ativo		integer,
+constraint pk_id_sal_tb_grade_salario primary key(id_salario)
+);
+
+create table tb_funcionario(
+id_funcionario 		integer,
+nome				varchar(60),
+id_gerente			integer,
+id_departamento		integer,
+dt_nascimento		date,
+salario				numeric,
+cargo				varchar(60),
+fg_ativo			integer,
+constraint pk_id_func_tb_funcionario primary key (id_funcionario),
+constraint fk_id_departamento_tb_funcionario foreign key(id_departamento) references tb_departamento(id_departamento),
+constraint fk_id_gerente_tb_funcionario foreign key(id_gerente) references tb_funcionario(id_funcionario)
+);
+
+create sequence seq_departamento
+increment by 10
+start with 10;
+
+create or replace function fn_manipula_departamento(p_id_departamento int,
+													p_nome varchar(60),
+													p_cidade varchar(40),
+													p_fg_ativo int,
+													p_op char)
+	returns varchar as 
+$$
+declare
+	v_id_departamento tb_departamento.id_departamento%type;
+	v_nome tb_departamento.nome%type;
+begin
+	if p_op = 'I' then
+		select nome into v_nome from tb_departamento
+		where nome = p_nome;
+		if(v_nome is null) then
+			select nextval('seq_departamento') into v_id_departamento;
+			insert into tb_departamento(id_departamento,
+										nome,
+										cidade,
+										fg_ativo)
+			values
+			(v_id_departamento, p_nome, p_cidade, p_fg_ativo);
+			
+			return 'O departamento ' || p_nome || ' foi inserido com sucesso!';
+		else
+			return 'O departamento ' || p_nome || ' ja existe!';
+		end if;
+	elseif p_op = 'U' then
+		select id_departamento into v_id_departamento from tb_departamento
+		where id_departamento = p_id_departamento;
+
+		if (v_id_departamento is not null) then	
+			update tb_departamento
+			set nome = p_nome,
+				cidade = p_cidade,
+			 	fg_ativo = p_fg_ativo
+			where id_departamento = p_id_departamento;
+			return 'O departamento do ID ' || p_id_departamento || ' foi alterado com sucesso!';
+			
+		else
+			return 'O id ' || p_id_departamento || ' nao existe!';
+		end if;
+		
+	elseif p_op = 'D' then
+		select id_departamento into v_id_departamento from tb_departamento
+		where id_departamento = p_id_departamento;
+		
+		if (v_id_departamento is not null) then
+			delete from tb_departamento 
+			where id_departamento = v_id_departamento;
+			return 'O ID ' || p_id_departamento || ' foi removido com sucesso!' ;
+		else
+			return 'O id ' || p_id_departamento || ' nao existe!';
+		end if;
+	else
+		return 'Opcao invalida!';
+	end if;
+end;
+$$
+language plpgsql;
+
+
+select fn_manipula_departamento(NULL, 'Contabilidade', 'São Paulo', 1, 'I');
+select fn_manipula_departamento(NULL, 'Pesquisa', 'Minas Gerais', 1, 'I');
+select fn_manipula_departamento(NULL, 'Vendas', 'Santa Catarina', 1, 'I');
+select fn_manipula_departamento(NULL, 'Operações', 'Rio de Janeiro', 1, 'I');
+
+select fn_manipula_departamento(40,'Recursos Humanos', 'São Joaquim da Barra', 99, 'U');
+
+select fn_manipula_departamento(10,null,null,null,'D');
+select fn_manipula_departamento(99,null,null,null,'D');
+
+create sequence seq_salario
+increment by 1
+start with 1;
+
+create or replace function fn_manipula_grade_salario(p_id_salario int,
+													 p_min_salario numeric,
+													 p_max_salario numeric,
+													 p_fg_ativo int,
+													 p_op char)
+	returns varchar as
+$$
+declare 
+	v_id_salario tb_grade_salario.id_salario%type;
+begin
+	if(p_op = 'I') then
+		select nextval('seq_salario') into v_id_salario;
+		insert into tb_grade_salario
+		values
+		(v_id_salario, p_min_salario, p_max_salario, p_fg_ativo);
+		return 'Inserido com sucesso';
+	elseif (p_op = 'U') then
+		select id_salario into v_id_salario from tb_grade_salario
+		where id_salario = p_id_salario;
+		if(v_id_salario is not null) then
+			update tb_grade_salario
+			set min_salario = p_min_salario,
+				max_salario = p_max_salario,
+				fg_ativo = p_fg_ativo
+			where id_salario = p_id_salario;
+			return 'Modificado com sucesso!';
+		else
+			return 'O salario de id ' || p_id_salario || ' nao existe';
+		end if;
+	elseif (p_op = 'D') then
+		select id_salario into v_id_salario from tb_grade_salario
+		where id_salario = p_id_salario;
+		if(v_id_salario is not null) then 
+			delete from tb_grade_salario
+			where id_salario = p_id_salario;
+			return 'O salario de ID ' || p_id_salario || ' foi removido com sucesso!';
+		else
+			return 'O salario de id ' || p_id_salario || ' nao existe';
+		end if;
+	else
+		return 'Opcao invalida!';
+	end if;
+end;
+$$
+language plpgsql;
+
+
+select fn_manipula_grade_salario(NULL, 700.00, 1200.00, 1, 'I');
+select fn_manipula_grade_salario(NULL, 1201.00, 1400.00, 1, 'I');
+select fn_manipula_grade_salario(NULL, 1401.00, 2000.00, 1, 'I');
+select fn_manipula_grade_salario(NULL, 2001.00, 3000.00, 1, 'I');
+select fn_manipula_grade_salario(NULL, 3001.00, 6000.00, 1, 'I');
+
+select fn_manipula_grade_salario(1, 750.00, 1250.00, 99, 'U');
+
+select fn_manipula_grade_salario(1, NULL, NULL, NULL, 'D');
+select fn_manipula_grade_salario(99, NULL, NULL, NULL, 'D');
+
+
+create or replace function fn_manipula_funcionario(p_id_funcionario tb_funcionario.id_funcionario%type,
+												   p_id_departamento int,
+												   p_nm_funcionario tb_funcionario.nome%type,
+												   p_id_gerente tb_funcionario.id_gerente%type,
+												   p_cargo tb_funcionario.cargo%type,
+												   p_dt_nascimento tb_funcionario.dt_nascimento%type,
+												   p_salario tb_funcionario.salario%type,
+												   p_fg_ativo tb_funcionario.fg_ativo%type,
+												   p_op char)
+	returns varchar as 
+$$
+declare 
+	v_id_funcionario tb_funcionario.id_funcionario%type;
+begin
+	if(p_op = 'I') then
+		select id_funcionario into v_id_funcionario from tb_funcionario
+		where id_funcionario = p_id_funcionario;
+		if(v_id_funcionario is null) then 
+			insert into tb_funcionario
+			values		(p_id_funcionario,
+						 p_nm_funcionario,
+						 p_id_gerente,
+						 p_id_departamento,
+						 p_dt_nascimento,
+						 p_salario,
+						 p_cargo,
+						 p_fg_ativo);
+			return 'Funcionario ' || p_nm_funcionario || ' e ID ' || p_id_funcionario || ' inserido com sucesso!';
+		else
+			return 'Funcionario ja existe!';
+		end if;
+	elseif (p_op = 'U') then 
+		select id_funcionario into v_id_funcionario from tb_funcionario
+		where id_funcionario = p_id_funcionario;
+		if(v_id_funcionario is not null) then
+			update tb_funcionario 
+			set nome = p_nm_funcionario,
+				id_gerente = p_id_gerente,
+				id_departamento = p_id_departamento,
+				dt_nascimento = p_dt_nascimento,
+				salario = p_salario,
+				cargo = p_cargo,
+				fg_ativo = p_fg_ativo
+			where id_funcionario = p_id_funcionario;
+			return 'Funcionario alterado com sucesso!';
+		else
+			return 'Funcionario nao existe!';
+		end if;
+	elseif (p_op = 'D') then
+		select id_funcionario into v_id_funcionario from tb_funcionario
+		where id_funcionario = p_id_funcionario;
+		if(v_id_funcionario is not null) then
+			delete from tb_funcionario
+			where id_funcionario = p_id_funcionario;
+			return 'Funcionario removido com sucesso!';
+		else
+			return 'Funcionario nao existe!';
+		end if;
+	else
+		return 'Opcao invalida!';
+	end if;
+end;
+$$
+language plpgsql;
+
+
+select fn_manipula_funcionario(7839, 10, 'José Manoel', NULL, 'Presidente', '31/07/78', 5000.00, 1, 'I');
+select fn_manipula_funcionario(7698, 30, 'Fernando Luis', 7839, 'Gerente', '01/05/81', 2850.00, 1, 'I');
+select fn_manipula_funcionario(7782, 10, 'João Mendes', 7839, 'Gerente', '09/06/81', 2450.00, 1, 'I');
+select fn_manipula_funcionario(7566, 20, 'Ricardo Vasconcelos', 7839, 'Gerente', '02/04/81', 2975.00, 1, 'I');
+select fn_manipula_funcionario(7654, 30, 'Pedro Henrique', 7698, 'Vendedor', '28/09/81', 1250.00, 1, 'I');
+
+select fn_manipula_funcionario(7839, 40, 'José da Silva', 7698, 'Supervisor', '01/01/80', 3100.00, 99, 'U');
+
+select fn_manipula_funcionario(7782, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'D');
+select fn_manipula_funcionario(9999, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'D');
+
+
+create or replace function fn_maior_menor(p_a integer, p_b integer, p_c integer)
+returns varchar as
+$$
+declare
+maior integer;
+menor integer;
+begin
+	if (p_a >= p_b and p_a >= p_c) then
+		maior = p_a;
+	elsif (p_b >= p_a and p_b >= p_c) then
+		maior = p_b;
+	else
+		maior = p_c;
+	end if;
+
+	if(p_a <= p_b and p_a <= p_c) then
+		menor = p_a;
+	elsif(p_b <= p_a and p_b <= p_c)then
+		menor = p_b;
+	else
+		menor = p_c;
+	end if;
+	return 'Entre as três variáveis, o maior valor eh: ' ||maior|| 'e o menor eh: ' ||menor;
+end;
+$$
+language plpgsql;
+
+
+select fn_maior_menor(-100,-1,0);

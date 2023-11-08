@@ -1,0 +1,97 @@
+CREATE TABLE tb_mulher(
+    ID_MULHER   INTEGER     NOT NULL,
+    NOME_MULHER VARCHAR(20) NOT NULL,
+
+    CONSTRAINT pk_tb_mulher PRIMARY KEY (ID_MULHER)
+);
+
+CREATE TABLE tb_homem(
+    ID_HOMEM    INTEGER     NOT NULL,
+    NOME_HOMEM  VARCHAR(20) NOT NULL,
+    ID_MULHER   INTEGER,
+
+    CONSTRAINT pk_tb_homem        PRIMARY KEY (ID_HOMEM),
+    CONSTRAINT fk_tb_homem_mulher FOREIGN KEY (ID_HOMEM) REFERENCES tb_mulher (ID_MULHER)
+);
+
+Exercício 1
+
+INSERT INTO tb_homem
+VALUES
+(10, 'Anderson', NULL),
+(20, 'Jander', 1),
+(30, 'Rogério', 2);
+
+Exercício 2
+
+INSERT INTO tb_mulher
+VALUES
+(1, 'Edna'),
+(2, 'Stefanny'),
+(3, 'Cássia');
+
+Exercício 3
+
+A)
+
+SELECT *
+FROM tb_homem h
+INNER JOIN tb_mulher m ON (h.ID_MULHER = m.ID_MULHER);
+
+B)
+
+SELECT *
+FROM tb_homem h
+NATURAL JOIN tb_mulher m ON (h.ID_MULHER = m.ID_MULHER);
+
+C)
+
+SELECT *
+FROM tb_homem
+JOIN tb_mulher USING (ID_MULHER);
+
+D)
+
+SELECT *
+FROM tb_homem h
+INNER JOIN tb_mulher m ON (h.ID_MULHER = m.ID_MULHER);
+
+E)
+
+SELECT *
+FROM tb_homem
+CROSS JOIN tb_mulher m;
+
+Exercício 4
+
+A)
+
+SELECT *
+FROM tb_homem h
+OUTER LEFT JOIN tb_mulher m ON (h.ID_MULHER = m.ID_MULHER);
+
+B)
+
+SELECT *
+FROM tb_homem h
+OUTER RIGHT JOIN tb_mulher m (h.ID_MULHER = m.ID_MULHER);
+
+C)
+
+SELECT *
+FROM tb_homem h
+OUTER RIGHT JOIN tb_mulher m (h.ID_MULHER = m.ID_MULHER);
+
+D)
+
+SELECT *
+FROM tb_homem h
+OUTER LEFT JOIN tb_mulher USING (ID_MULHER);
+
+SELECT *
+FROM tb_homem h
+OUTER RIGHT JOIN tb_mulher USING (ID_MULHER);
+
+SELECT *
+FROM tb_homem h
+OUTER LEFT JOIN tb_mulher USING (ID_MULHER);

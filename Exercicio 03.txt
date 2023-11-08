@@ -1,0 +1,53 @@
+Exercicio 1
+
+SELECT nomeEmpregado
+FROM Empregado
+WHERE idDepartamento = 200;
+
+Exercicio 2
+
+SELECT e.nomeEmpregado 
+FROM Empregado e 
+INNER JOIN Ferias f ON (e.idEmpregado = f.idEmpregado)
+WHERE e.idDepartamento = 200 AND e.idEmpregado NOT IN(SELECT f.idEmpregado
+                                                            FROM Ferias as 'f'
+                                                            WHERE ano = 2019);
+
+Exercicio 3
+
+SELECT COUNT(*), AVG(salario)
+FROM Empregado;
+
+Exercicio 4
+
+SELECT idEmpregado, nomeEmpregado
+FROM Empregado
+WHERE salario > AVG(salario)
+AND numeroDependentes > 2;
+
+Exercicio 5
+
+SELECT p.nomeProjeto, e.nomeEmpregado
+FROM Projeto p
+INNER JOIN Empregado e ON (ep.idEmpregado = p.idEmpregado)
+INNER JOIN Empregado_Projeto ep ON (p.idProjeto = ep.idProjeto)
+ORDER BY p.nomeProjeto, e.nomeEmpregado;
+
+Exercicio 6
+
+INSERT INTO Departamento(idDepartamento, nomeDepartamento)
+VALUES
+(500,'Vendas');
+
+Exercicio 7
+
+CREATE TABLE Empregado(
+    idEmpregado       INT,
+    idDepartamento    INT,
+    nomeEmpregado     VARCHAR(200),
+    numeroDependentes INT,
+    salario           NUMERIC(2,7),
+
+    CONSTRAINT pk_Empregado PRIMARY KEY (idEmpregado),
+    CONSTRAINT fk_Empregado_Departamento FOREIGN KEY (idDepartamento) REFERENCES Departamento (idDepartamento)
+);

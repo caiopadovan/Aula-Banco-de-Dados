@@ -1,0 +1,154 @@
+Exercício 1
+
+CREATE TABLE tb_grade_salario(
+    id_salario  INTEGER NOT NULL,
+    min_salario NUMERIC NOT NULL,
+    max_salario NUMERIC NOT NULL,
+    fg_ativo    INTEGER NOT NULL,
+
+    CONSTRAINT pk_tb_grade_salario PRIMARY KEY (id_salario)
+);
+
+CREATE TABLE tb_departamento(
+    id_departamento INTEGER     NOT NULL,
+    nome            VARCHAR(60) NOT NULL,
+    cidade          VARCHAR(40) NOT NULL,
+    fg_ativo        INTEGER     NOT NULL,
+
+    CONSTRAINT pk_tb_departamento PRIMARY KEY (id_departamento)
+);
+
+CREATE TABLE tb_funcionario(
+    id_funcionario  INTEGER     NOT NULL,
+    nome            VARCHAR(60) NOT NULL,
+    id_gerente      INTEGER,
+    id_departamento INTEGER     NOT NULL,
+    dt_nascimento   DATE        NOT NULL,
+    salario         NUMERIC     NOT NULL,
+    cargo           VARCHAR(60) NOT NULL,
+    fg_ativo        INTEGER     NOT NULL,
+
+    CONSTRAINT pk_tb_funcionario PRIMARY KEY (id_funcionario),
+    CONSTRAINT fk_tb_funcionario_tb_departamento FOREIGN KEY (id_gerente, id_departamento) REFERENCES tb_departamento
+);
+
+Exercício 2
+
+INSERT INTO tb_departamento
+VALUES
+(10, 'CONTABILIDADE', 'SÃO PAULO', 1),
+(20, 'PESQUISA', 'MINAS GERAIS', 1),
+(30, 'VENDAS', 'SANTA CATARINA', 1),
+(40, 'OPERAÇÕES', 'RIO DE JANEIRO', 1),
+
+INSERT INTO tb_grade_salario
+VALUES
+(1, 700, 1200, 1),
+(2, 1201, 1400, 1),
+(3, 1401, 2000, 1),
+(4, 2001, 3000, 1),
+(5, 3001, 9999, 1),
+
+INSERT INTO tb_funcionario
+(id_funcionario, id_departamento, nome, id_gerente, cargo, dt_nascimento, salario, fg_ativo)
+VALUES
+(7839, 10, 'JOSÉ MANOEL DA SILVA PRADO', null, 'PRESIDENTE', '31/07/78', 5000, 1),
+(7698, 30, 'FERNANDO LUIS DA SILVA', 7839, 'GERENTE', '01/05/81', 2850, 1),
+(7782, 10, 'JOÃO MENDES SOUZA', 7839, 'GERENTE', '09/06/81', 2450, 1),
+(7566, 20, 'RICARDO VASCONCELOS', 7839, 'GERENTE', '02/04/81', 2975, 1),
+(7654, 30, 'PEDRO HENRIQUE SILVERIO', 7698, 'VENDEDOR', '29/09/81', 1250, 1),
+
+Exercício 3
+
+BEGIN TRANSACTION
+    DELETE FROM tb_funcionario WHERE id_funcionario = 7654;
+ROLLBACK;
+
+Exercício 4
+
+SELECT nome, salario, salario * 12
+FROM tb_funcionario;
+
+Exercício 5
+
+SELECT id_funcionario, nome, cargo, salario 
+FROM tb_funcionario 
+WHERE id_gerente IS NULL;
+
+Exercício 6
+
+SELECT nome, cargo, dt_nascimento, COALESCE(id_gerente, 9999)
+FROM tb_funcionario;
+
+Exercício 7
+
+SELECT nome, id_gerente, cargo, salario, dt_nascimento
+FROM tb_funcionario
+WHERE nome LIKE '_E%'
+ORDER BY salario DESC;
+
+Exercício 8
+
+SELECT id_funcionario "CÓDIGO", nome "FUNCIONÁRIO", id_gerente "CHEFE", cargo "OCUPAÇÃO", salario
+FROM tb_funcionario
+WHERE id_funcionario < 7654 OR id_funcionario > 7698
+ORDER BY id_funcionario ASC;
+
+Exercício 9
+
+SELECT f.id_funcionario, f.nome, f.cargo, d.nome, d.cidade
+FROM tb_funcionario f
+INNER JOIN tb_departamento d ON (f.id_departamento = d.id_departamento)
+WHERE id_funcionario != 7566 AND id_funcionario != 7654 AND id_funcionario != 7782
+ORDER BY id_funcionario;
+
+Exercício 10
+
+SELECT f.nome, f.cargo, f.salario s.id_salario
+FROM tb_funcionario f
+INNER JOIN tb_grade_salario s ON (f.salario > s.min_salario)
+ORDER BY salario DESC;
+
+Exercício 11
+
+SELECT f.nome || 'trabalha para ' || COALESCE(g.nome, 'os acionistas')
+FROM tb_funcionario f.id_gerente = tb_funcionario g.id_funcionario
+ORDER BY g.nome DESC;
+
+Exercício 12
+
+CREATE TABLE tb_cliente(
+    id_cliente  INTEGER      NOT NULL,
+    nm_cliente  VARCHAR(60)  NOT NULL,
+    nm_endereco VARCHAR(100) NOT NULL,
+    nm_cidade   VARCHAR(40)  NOT NULL,
+    fg_ativo    INTEGER      NOT NULL,
+
+    CONSTRAINT pk_tb_cliente PRIMARY KEY (id_cliente)
+);
+
+CREATE TABLE tb_pedido(
+    id_pedido   INTEGER NOT NULL,
+    id_cliente  INTEGER,
+    nr_pedido   INTEGER NOT NULL,
+    fg_ativo    INTEGER,
+
+    CONSTRAINT pk_tb_pedido            PRIMARY KEY (id_pedido),
+    CONSTRAINT fk_tb_pedido_tb_cliente FOREIGN KEY (id_cliente) REFERENCES tb_cliente
+);
+
+Exercício 13
+
+INSERT INTO tb_pedido
+VALUES
+(1, 3, 77895, 1),
+(2, 3, 44678, 1),
+(3, 1, 22456, 1),
+(4, 1, 24562, 1),
+(5, NULL, 34764, 1);
+
+INSERT INTO tb_cliente
+VALUES
+(1, 'HUGO DA SILVA MACHADO', 'RUA PEREIRA LAGO, 34 - BAIRRO CAMPOS ELISEOS', 'RIBEIRAO PRETO', 1),
+(2, 'TIAGO NUNES BERNARDO', 'AV. FRANCISCO JUNQUEIRA, 1208 - APTO 45 - BAIRRO MOCA', 'SAO PAULO', 1),
+(3, 'SABRINA JOAQUINA SILVEIRA', 'RUA NASCIMENTO, 234 - BAIRRO CENTRO', 'MOCOCA', 1);
