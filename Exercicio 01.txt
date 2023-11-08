@@ -1,0 +1,87 @@
+create database "EXERCICIO_01"
+encoding = 'UTF-8'
+template = TEMPLATE0
+connection limit 10
+
+create table tb_escolaridade(
+id_escolaridade INTEGER,
+descricao VARCHAR(60),
+fg_ativo INTEGER,
+constraint pk_escolaridade_id_escolaridade primary key(id_escolaridade)
+);
+
+create table tb_funcao(
+id_funcao INTEGER,
+descricao VARCHAR(60),
+salario NUMERIC(7,2),
+fg_ativo INTEGER,
+constraint pk_funcao_id_funcao primary key(id_funcao)
+);
+
+create table tb_funcionario(
+id_funcionario INTEGER,
+id_funcao INTEGER,
+id_escolaridade INTEGER,
+nome VARCHAR(60),
+cpf VARCHAR(11),
+rg VARCHAR(10),
+fg_ativo INTEGER,
+constraint pk_funcionario_id_funcionario primary key(id_funcionario),
+constraint fk_funcionario_id_funcao foreign key(id_funcao) references tb_funcao(id_funcao),
+constraint fk_funcionario_id_escolaridade foreign key(id_escolaridade) references tb_escolaridade(id_escolaridade)
+);
+
+insert into tb_escolaridade(id_escolaridade,descricao,fg_ativo) values
+(1,'Ensino Fundamental',1),
+(2,'Ensino Médio',1),
+(3,'Nivel Superior',1);
+
+insert into tb_funcao(id_funcao,descricao,salario,fg_ativo) values
+(1,'Desenvolvedor Java',4565.85,1),
+(2,'Desenvolvedor C#',3400.00,1),
+(3,'DBA',8500.00,1);
+
+insert into tb_funcionario(id_funcionario,id_funcao,id_escolaridade,nome,cpf,rg,fg_ativo) values
+(1,3,3,'Agnaldo Peterson',12344321,'98777-X',1),
+(2,2,2,'Camila Ap. Fernand',7651234,87658-0,1),
+(3,1,3,'Patricia Rossini',98765432111,987623-7,1);
+
+
+--Exercicio 04:
+
+select f.nome,f.cpf,e.descricao,fu.descricao,fu.salario from tb_funcionario f
+inner join tb_escolaridade e on f.id_escolaridade = e.id_escolaridade
+inner join tb_funcao fu on f.id_funcao = fu.id_funcao
+where fu.salario >= 3000.00 and fu.salario <= 4600.00
+and f.fg_ativo = 1 and e.fg_ativo = 1 and fu.fg_ativo = 1;
+
+--Exercicio 05:
+
+select f.id_funcionario,fu.descricao,e.descricao,f.nome,f.cpf,f.rg from tb_funcionario f
+inner join tb_escolaridade e on f.id_escolaridade = e.id_escolaridade
+inner join tb_funcao fu on f.id_funcao = fu.id_funcao
+where fu.descricao like '___e%' and f.fg_ativo = 1 and fu.fg_ativo = 1 and e.fg_ativo = 1
+order by 4 desc;
+
+--Exercicio 06:
+
+select f.id_funcionario, f.nome, fu.descricao,fu.salario, fu.salario * 12 as "salário anual" from tb_funcionario f
+inner join tb_escolaridade e on f.id_escolaridade = e.id_escolaridade
+inner join tb_funcao fu on f.id_funcao = fu.id_funcao
+order by fu.salario desc;
+
+--Exercicio 07:
+
+select f.nome, f.cpf, f.rg, fu.descricao, e.descricao from tb_funcionario f
+inner join tb_escolaridade e on f.id_escolaridade = e.id_escolaridade
+inner join tb_funcao fu on f.id_funcao = fu.id_funcao
+where fu.salario >= 4500.00 or fu.descricao = 'Desenvolvedor C#'
+order by e.descricao desc;
+
+--Exercicio 08:
+
+select f.nome, fu.descricao, e.descricao from tb_funcionario f
+inner join tb_escolaridade e on f.id_escolaridade = e.id_escolaridade
+inner join tb_funcao fu on f.id_funcao = fu.id_funcao
+where f.fg_ativo = 1 and fu.fg_ativo = 1 and e.fg_ativo = 1
+offset 2;
